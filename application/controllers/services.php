@@ -162,17 +162,23 @@ public function message_user_post(){
 		if($this->post('username')!=null&&$this->post('password')!=null){
 			$username=$this->post('username');
 			$password=$this->post('password');
-
+			if($username=='')
+				$this->response(array('status'=>'failed','result'=>'Username harus diisi'),200);
+			else if($password=='')
+				$this->response(array('status'=>'failed','result'=>'Password harus diisi'),200);
+			else{
 			$users=$this->staff->getUserByUsername($username);
-			if($users){
-				$user=$users[0];
-				if($user->password==md5($password))
-					$this->response(array('status'=>'success','result'=>$user),200);
-				else
-					$this->response(array('status'=>'failed','result'=>'Username dan password tidak cocok'));
+				if($users){
+					$user=$users[0];
+					if($user->password==md5($password))
+						$this->response(array('status'=>'success','result'=>$user),200);
+					else
+						$this->response(array('status'=>'failed','result'=>'Username dan password tidak cocok'));
+				}
+				else{
+					$this->response(array('status'=>'failed','result'=>'username tidak ditemukan'),200);
+				}
 			}
-			else
-				$this->response(array('status'=>'failed','result'=>'username tidak ditemukan'),200);
 		}
 		else
             $this->response(array('status'=>'failed','result'=>'failure'),200);
