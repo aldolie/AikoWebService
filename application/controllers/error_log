@@ -1,0 +1,2 @@
+[31-Mar-2015 12:15:19 UTC] PHP Warning:  require(APPPATHlibraries/REST_Controller.php): failed to open stream: No such file or directory in /home/k1295122/public_html/aiko/application/controllers/services.php on line 1
+[31-Mar-2015 12:15:19 UTC] PHP Fatal error:  require(): Failed opening required 'APPPATHlibraries/REST_Controller.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/k1295122/public_html/aiko/application/controllers/services.php on line 1
