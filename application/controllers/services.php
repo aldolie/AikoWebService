@@ -836,6 +836,30 @@ public function message_user_post(){
 			$this->response(null,404);
 		}	
 	}
+
+
+	public function report_month_post(){
+		if($this->post('from')!=null&&$this->post('to')!=null){
+			$from=$this->post('from');
+			$to=$this->post('to');
+			$type=$this->post('type');
+			if($this->post('userid')==null)
+				$transactions=$this->transaction->getReportByMonth($from,$to,$type);
+			else{
+				
+				$userid=$this->post('userid');
+				$transactions=$this->transaction->getReportByUserMonth($from,$to,$type,$userid);
+			}
+			if($transactions){
+				$this->response(array('status'=>'success','result'=>$transactions),200);
+			}
+			else
+				$this->response(array('status'=>'success','result'=>array()),200);
+			}
+		else{
+			$this->response(null,404);
+		}	
+	}
 	
 	
 	public function recapitulation_user_get(){

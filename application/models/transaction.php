@@ -216,6 +216,35 @@ class Transaction extends CI_Model {
         $query=$this->db->get();
         return $query->result();
     }
+
+    public function getReportByMonth($from,$to,$type){
+        $this->db->select("count(transaction_product.transactionid) as total_transaction,CONCAT_WS(' ',MONTHNAME((DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR))),YEAR(DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR))) as transactiontime, sum(transaction_product.price*transaction_product.quantity) as omset",false);
+        $this->db->from("transaction_product");
+        $this->db->join('product','product.productid=transaction_product.productid');
+        $this->db->where("transaction_product.status =",$type);
+        $this->db->where("DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR) >='$from'",NULL,FALSE);
+        $this->db->where("DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR) <='$to'",NULL,FALSE);
+        $this->db->group_by(array("transactiontime")); 
+        $this->db->order_by("transactiontime", "asc");
+        $query=$this->db->get();
+        return $query->result();
+    }
+
+    public function getReportByUserMonth($from,$to,$type,$userid){
+        $this->db->select("count(transaction_product.transactionid) as total_transaction,CONCAT_WS(' ',MONTHNAME((DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR))),YEAR(DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR))) as transactiontime, user.username ,user.nama,user.alamat,user.telepon,sum(transaction_product.price*transaction_product.quantity) as omset",false);
+        $this->db->from("transaction_product");
+        $this->db->join('product','product.productid=transaction_product.productid');
+        $this->db->join('user','user.userid=transaction_product.userid');
+        $this->db->where("transaction_product.status =",$type);
+        $this->db->where("DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR) >='$from'",NULL,FALSE);
+        $this->db->where("DATE_ADD(transaction_product.created_at, INTERVAL 7 HOUR) <='$to'",NULL,FALSE);
+        $this->db->where("transaction_product.userid =","$userid");
+        $this->db->where("transaction_product.userid =","$userid");
+        $this->db->group_by(array("username","nama","alamat","telepon","transactiontime")); 
+        $this->db->order_by("transactiontime", "asc");
+        $query=$this->db->get();
+        return $query->result();
+    }
 	
 	function updateStatus($status,$transactionid){
         $data= array('status' => $status);
