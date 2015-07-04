@@ -2,21 +2,6 @@
 
 class Services extends REST_Controller  {
 
-	/**
-	 * Index Page for this controller.
-	 *
-	 * Maps to the following URL
-	 * 		http://example.com/index.php/welcome
-	 *	- or -  
-	 * 		http://example.com/index.php/welcome/index
-	 *	- or -
-	 * Since this controller is set as the default controller in 
-	 * config/routes.php, it's displayed at http://example.com/
-	 *
-	 * So any other public methods not prefixed with an underscore will
-	 * map to /index.php/welcome/<method_name>
-	 * @see http://codeigniter.com/user_guide/general/urls.html
-	 */
 
 	function __construct()
     {
@@ -31,15 +16,20 @@ class Services extends REST_Controller  {
 	    }
         parent::__construct();
         
-        
-		
+        $this->load->model('user');
+        $this->load->model('product_master');
+        $this->load->model('category');
+        $this->load->model("transaction");
+		$this->load->model("publish");
+		$this->load->model("inventory");
+		$this->load->model("staff");
+		$this->load->model("message");
     }
 
     /* Users_Function_start */
 
 	public function users_get(){
 		
-        $this->load->model('user');
 		if($this->get('created_at')!=null)
 			$users=$this->user->getUserSyncCreated($this->get('created_at'));
 		else if($this->get('updated_at')!=null)
@@ -56,9 +46,7 @@ class Services extends REST_Controller  {
 
 	public function new_message_get(){
 		
-        $this->load->model('user');
 		if($this->get('created_at')!=null&&$this->get('id')){
-			$this->load->model("message");
 			$new=$this->message->getMessageSyncCreated(substr($this->get('created_at'),0,10).' '.substr($this->get('created_at'),10,8),$this->get('id'));
 			if($new){
 				$this->response(array('status'=>'success','result'=>$new),200);
@@ -75,26 +63,21 @@ class Services extends REST_Controller  {
 
 
 
-public function message_user_post(){
+	public function message_user_post(){
 		$id=$this->post('i');
 		$caption=$this->post('cap');
 		$message=$this->post('mes');
-		$this->load->model("message");
 		if($this->message->insertMessage($caption,$message,$id)){
 			$this->response(array('status'=>'success','result'=>1),200);
 		}
 		else{
 			$this->response(array('status'=>'failed','result'=>0),200);
 		}
-			
-		
 	}
 
 	
 	
     public function user_get(){
-
-        $this->load->model('user');
 		$id=0;
 		if($this->get('id')!=null)
 			$id=$this->get('id');
@@ -109,8 +92,6 @@ public function message_user_post(){
 
 
     public function user_delete_post(){
-
-        $this->load->model('user');
 		$id=0;
 		$key='';
 		if($this->post('id')!=null)
@@ -131,8 +112,6 @@ public function message_user_post(){
     }
 
 	public function users_signin_post(){
-
-        $this->load->model('user');
 		if($this->post('username')!=null&&$this->post('password')!=null){
 			$username=$this->post('username');
 			$password=$this->post('password');
@@ -157,7 +136,6 @@ public function message_user_post(){
 		$id=$this->post('i');
 		$caption=$this->post('cap');
 		$message=$this->post('mes');
-		$this->load->model("publish");
 		if($this->publish->insertPublish($id,$caption,$message)){
 			$this->response(array('status'=>'success','result'=>1),200);
 		}
@@ -178,7 +156,6 @@ public function message_user_post(){
 			else if($password=='')
 				$this->response(array('status'=>'failed','result'=>'Password harus diisi'),200);
 			else{
-			$this->load->model("staff");
 			$users=$this->staff->getUserByUsername($username);
 				if($users){
 					$user=$users[0];
@@ -206,8 +183,6 @@ public function message_user_post(){
 	}
 
 	private function check_username($username){
-
-        $this->load->model('user');
 		$users=$this->user->getUserByUsername($username);
 		if($users)
 			return true;
@@ -216,7 +191,6 @@ public function message_user_post(){
 	}
 
 	public function users_register_post(){
-
 		$username=($this->post('username'));
 		$password=($this->post('password'));
 		$nama=($this->post('nama'));
@@ -230,8 +204,6 @@ public function message_user_post(){
 			$this->response(array('status'=>'failed','result'=>'-2','reason'=>'Format Email Salah'),200);
 		}
 		else{
-
-        	$this->load->model('user');
 			$statusInsert=$this->user->insertUser($username,$password,$nama,$alamat,$telepon,$email,$status);
 			if($statusInsert){
 				$users=$this->user->getUserByUsername($username);
@@ -254,8 +226,6 @@ public function message_user_post(){
 			$this->response(array('status'=>'failed','result'=>'-1','reason'=>'Format Email Salah'),200);
 		}
 		else{
-
-        	$this->load->model('user');
 			$statusUpdate=$this->user->updateUser($nama,$alamat,$telepon,$email,$note,$bb,$userid);
 			if($statusUpdate)
 				$this->response(array('status'=>'success','result'=>'1'),200);
@@ -266,8 +236,6 @@ public function message_user_post(){
 	}
 
 	function user_update_status_post(){
-
-        $this->load->model('user');
 		$userid=($this->post('userid'));
 		$status=($this->post('status'));
 		$statusUpdate=$this->user->updateUserStatus($status,$userid);
@@ -282,7 +250,7 @@ public function message_user_post(){
 	/* Products_Function_start */
 
 	public function products_master_get(){
-		$this->load->model('product_master');
+		
 		$methods=0;
 		if($this->get('method')!=null)
 			$methods=$this->get('method');
@@ -301,8 +269,7 @@ public function message_user_post(){
 	
 	
 	public function po_master_get(){
-		$this->load->model('product_master');
-
+		
 		$methods=0;
 		if($this->get('method')!=null)
 			$methods=$this->get('method');
@@ -323,7 +290,6 @@ public function message_user_post(){
 		
 		if($this->get('i')!=null){
 		$id=$this->get('i');
-		$this->load->model("inventory");
 		$inventory=$this->inventory->getInventoryByProductId($id);
 		
 			if($inventory)
@@ -342,8 +308,6 @@ public function message_user_post(){
 			$id=$this->post('i');
 			$quantity=$this->post('q');
 			$type=1;
-			$this->load->model('product_master');
-			$this->load->model("inventory");
 			$stock=$this->product_master->getStock($id);
 				$inventory=$this->inventory->insertInventory($id,$quantity,$type);
 				if($inventory)
@@ -374,14 +338,12 @@ public function message_user_post(){
 			$id=$this->post('i');
 			$quantity=$this->post('q');
 			$type=2;
-			$this->load->model('product_master');
 			$stock=$this->product_master->getStock($id);
 		
 				if($stock<$quantity){
 					$this->response(array('status'=>'failed','result'=>array(),'reason'=>'Tidak Mencukupi'),200);
 				}
 				else{
-					$this->load->model("inventory");
 					$inventory=$this->inventory->insertInventory($id,$quantity,$type);
 					if($inventory)
 					{
@@ -408,7 +370,6 @@ public function message_user_post(){
 	public function new_get(){
 		
 		if($this->get('created_at')!=null){
-			$this->load->model("publish");
 			$new=$this->publish->getPublishSyncCreated(substr($this->get('created_at'),0,10).' '.substr($this->get('created_at'),10,8));
 			if($new){
 				$this->response(array('status'=>'success','result'=>$new),200);
@@ -427,7 +388,6 @@ public function message_user_post(){
 		$id=0;
 		if($this->get('i')!=null)
 			$id=$this->get('i');
-		$this->load->model('product_master');
 		$success=$this->product_master->publishProduct($id);
 		if($success)
 			$this->response(array('status'=>'success'),200);
@@ -440,7 +400,6 @@ public function message_user_post(){
 		$id=0;
 		if($this->post('i')!=null)
 			$id=$this->post('i');
-		$this->load->model('product_master');
 		$success=$this->product_master->deleteProduct($id);
 		if($success)
 			$this->response(array('status'=>'success'),200);
@@ -468,7 +427,7 @@ public function message_user_post(){
 			$search=$this->get('search');
 		if($this->get('t')!=null)
 			$type=$this->get('t');
-		$this->load->model('product_master');
+		
 		if($method=='admin'){
 			$products=$this->product_master->getProductsForAdmin($offset,$limit,$cat,$search);
 			$count=$this->product_master->getProductsForAdminCount($offset+$limit,$limit,$cat,$search);
@@ -494,13 +453,11 @@ public function message_user_post(){
 	    $type    = ($this->post('type'));
 		$r_type=$this->post('r_type');
 		$berat=$this->post('berat');
-		
 		if($hargaeceran<0)
 			$this->response(array('status'=>'failed','result'=>'-2','reason'=>'Harus Lebih Besar dari 0'),200);
 		else if($hargagrosir<0)
 			$this->response(array('status'=>'failed','result'=>'-3','reason'=>'Harus Lebih Besar dari 0'),200);
 		else{
-			$this->load->model('product_master');
 			$statusInsert=$this->product_master->insertProduct($productname,$categoryid,$hargaeceran,$hargagrosir,$description,0,$berat,$type,$r_type);
 			if($statusInsert)
 				$this->response(array('status'=>'success','result'=>'1','data'=>$statusInsert,'reason'=>'Berhasil'),200);
@@ -518,7 +475,6 @@ public function message_user_post(){
 	    $description    = ($this->post('description'));
 		$stock    = ($this->post('stock'));
 		$berat    = ($this->post('berat'));
-
     	if($productname=='')
 			$this->response(array('status'=>'failed','result'=>'-1','reason'=>'Harus di isi'),200);
 		else if($hargaeceran<0)
@@ -526,7 +482,6 @@ public function message_user_post(){
 		else if($hargagrosir<0)
 			$this->response(array('status'=>'failed','result'=>'-3','reason'=>'Harus Lebih Besar dari 0'),200);
 		else{
-			$this->load->model('product_master');
 			$statusInsert=$this->product_master->updateProduct($productname,$categoryid,$hargaeceran,$hargagrosir,$description,$stock,$berat,$productid);
 			if($statusInsert)
 				$this->response(array('status'=>'success','result'=>'1'),200);
@@ -560,7 +515,6 @@ public function message_user_post(){
 			$names=explode(".",$name);
 			$ext = end($names);
 			$this->resize($full_path,$ext,$file_path,$raw_name);
-			$this->load->model('product_master');
 			$statusInsert=$this->product_master->updateProductImage($filename,$raw_name.'_small.'.$ext,$productid);
 			if($statusInsert)
 			{
@@ -595,7 +549,6 @@ public function message_user_post(){
 		else
 		{
 			$data=$this->upload->data();
-			$this->load->model('product_master');
 			$statusInsert=$this->product_master->updateProductImage($filename,$productid);
 			if($statusInsert)
 			{
@@ -661,7 +614,7 @@ public function message_user_post(){
 
 
 	public function categories_get(){
-		$this->load->model('category');
+		
 		if($this->get('created_at')!=null)
 			$categories=$this->category->getCategoriesSyncCreated($this->get('created_at'));
 		else if($this->get('updated_at')!=null)
@@ -683,7 +636,6 @@ public function message_user_post(){
 	    if($categoryname=='')
 			$this->response(array('status'=>'failed','result'=>'-1','reason'=>'Harus di isi'),200);
 		else{
-			$this->load->model('category');
 			$statusInsert=$this->category->insertCategory($categoryname);
 			if($statusInsert)
 				$this->response(array('status'=>'success','result'=>'1'),200);
@@ -698,7 +650,6 @@ public function message_user_post(){
 	    if($categoryname=='')
 			$this->response(array('status'=>'failed','result'=>'-1','reason'=>'Harus di isi'),200);
 		else{
-			$this->load->model('category');
 			$statusInsert=$this->category->updateCategory($categoryname,$categoryid);
 			if($statusInsert)
 				$this->response(array('status'=>'success','result'=>'1'),200);
@@ -717,7 +668,6 @@ public function message_user_post(){
 		$userid=0;
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getTransactionByUserId($userid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -732,7 +682,7 @@ public function message_user_post(){
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
 		$transaction=null;
-		$this->load->model("transaction");
+		
 		if($this->get('created_at')!=null)
 			$transaction=$this->transaction->getTransactionSyncCreated(substr($this->get('created_at'),0,10).' '.substr($this->get('created_at'),10,8),$userid);
 		else if($this->get('updated_at')!=null)
@@ -749,7 +699,6 @@ public function message_user_post(){
 		$userid=0;
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrderByUserId($userid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -763,7 +712,6 @@ public function message_user_post(){
 		$userid=0;
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrderByUserIdAdmin($userid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -776,7 +724,6 @@ public function message_user_post(){
 		$userid=0;
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrderPOByUserId($userid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -790,7 +737,6 @@ public function message_user_post(){
 		$userid=0;
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrderPOByUserId($userid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -804,7 +750,6 @@ public function message_user_post(){
 		$productid=0;
 		if($this->get("id")!=null)
 			$productid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrderByProductId($productid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -814,7 +759,6 @@ public function message_user_post(){
 	}
 	
 	public function order_product_get(){
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrderProduct();
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -827,7 +771,6 @@ public function message_user_post(){
 	public function tr_po_ready_post(){
 		if($this->post('i')!=null){
 			$id=$this->post('i');
-			$this->load->model("transaction");
 			if($this->transaction->postProductReady($id)){
 				$this->response(array('status'=>'success','result'=>true),200);
 			}
@@ -841,7 +784,6 @@ public function message_user_post(){
 	}
 
 	public function order_get(){
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getOrder();
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -852,7 +794,6 @@ public function message_user_post(){
 	
 	
 	public function recapitulation_get(){
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getRecapitulation();
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -866,7 +807,7 @@ public function message_user_post(){
 		if($this->post('from')!=null&&$this->post('to')!=null){
 			$from=$this->post('from');
 			$to=$this->post('to');
-			$this->load->model("transaction");
+			
 			if($this->post('userid')==null)
 				$transactions=$this->transaction->getReport($from,$to);
 			else{
@@ -890,7 +831,6 @@ public function message_user_post(){
 		$userid=0;
 		if($this->get("id")!=null)
 			$userid=$this->get("id");
-		$this->load->model("transaction");
 		$transactions=$this->transaction->getRecapitulationByUserId($userid);
 		if($transactions){
 			$this->response(array('status'=>'success','result'=>$transactions),200);
@@ -907,14 +847,12 @@ public function message_user_post(){
 		}else{
 			$productid=$this->post("productid");
 			$quantity=$this->post("quantity");
-			$this->load->model('product_master');
 			$stock=$this->product_master->getStock($productid);
 			$status="Pending";
 			if($stock<$quantity){
 				$this->response(array('status'=>'failed','result'=>0,'error'=>"Stock tidak mencukupi"),200);
 			}
 			else{
-				$this->load->model("transaction");
 				$price=$this->product_master->getPriceGrosir($productid);
 				$id=$this->transaction->insertTransaction($userid,$productid,$price,$quantity,$status);
 				if($id!=0){
@@ -937,7 +875,6 @@ public function message_user_post(){
 		}else{
 			$productid=$this->post("productid");
 			$quantity=$this->post("quantity");
-			$this->load->model('product_master');
 			$product=$this->product_master->getProduct($productid);
 			
 			$stock=$product->stock;
@@ -952,7 +889,6 @@ public function message_user_post(){
 				$this->response(array('status'=>'failed','result'=>0,'error'=>"Stock tidak mencukupi"),200);
 			}
 			else{
-				$this->load->model("transaction");
 				$price=$this->product_master->getPriceGrosir($productid);
 				$id=$this->transaction->insertTransaction($userid,$productid,$price,$quantity,$status);
 				if($id!=0){
@@ -969,7 +905,7 @@ public function message_user_post(){
 
 
 	public function product_id_get($id){
-		$this->load->model('product_master');
+		
 		$product=$this->product_master->getProductById($id);
 		if($product){
 			$this->response(array('status'=>'success','result'=>$product),200);
@@ -987,7 +923,6 @@ public function message_user_post(){
 		if($userid==0||$userid==''){
 			$this->response(array('status'=>'failed','result'=>0,'error'=>"Gagal memasukkan data, Silahkan logout dan login kembali"),200);
 		}else{
-			$this->load->model('product_master');
 			$productid=$this->post("productid");
 			$quantity=$this->post("quantity");
 			$stock=$this->product_master->getStock($productid);
@@ -996,7 +931,6 @@ public function message_user_post(){
 				$this->response(array('status'=>'failed','result'=>0,'error'=>"Stock tidak mencukupi"),200);
 			}
 			else{
-				$this->load->model("transaction");
 				$price=$this->product_master->getPriceGrosir($productid);
 				$id=$this->transaction->insertTransaction($userid,$productid,$price,$quantity,$status);
 				if($id!=0){
@@ -1015,10 +949,9 @@ public function message_user_post(){
 		if($this->post('s')!=null&&$this->post('id')!=null){
 			$status=$this->post('s');
 			$transactionid=$this->post('id');
-			$this->load->model("transaction");
+			
 			if($this->transaction->updateStatus($status,$transactionid)){
 				if($status=='Reject'){
-					$this->load->model('product_master');
 					$transaction=$this->transaction->getTransactionById($transactionid);
 					$stock=$this->product_master->getStock($transaction->productid);
 					$this->product_master->updateStockProduct($stock+$transaction->quantity,$transaction->productid);
@@ -1040,7 +973,7 @@ public function message_user_post(){
 	/* Transactions_Function_End */
 
 	public function date_get(){
-		$this->load->model("transaction");
+		
 		$date = new DateTime($this->transaction->getDate());
 		$transactiondate=$date->format('Y-m-dH:i:s');
 		$this->response(array('status'=>'success','result'=>$transactiondate),200);	
